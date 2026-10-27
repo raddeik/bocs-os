@@ -7,15 +7,15 @@
   let zIndex = 12;
   let toastTimer;
 
-  const savedNotes = () => localStorage.getItem('nexora-notes') || '';
-  const savedAccent = () => localStorage.getItem('nexora-accent') || '#a78bfa';
+  const savedNotes = () => localStorage.getItem('bocs-notes') || '';
+  const savedAccent = () => localStorage.getItem('bocs-accent') || '#a78bfa';
   const appNames = {
     files: ['Archivos', '▰', 'icon-folder'],
     notes: ['Notas', '✎', 'icon-notes'],
     calculator: ['Calculadora', '＋', 'icon-calc'],
     terminal: ['Terminal', '›_', 'icon-terminal'],
     settings: ['Ajustes', '⚙', 'icon-settings'],
-    about: ['Acerca de NEXORA', 'N', 'icon-about'],
+    about: ['Acerca de BOCS', 'N', 'icon-about'],
     calendar: ['Calendario', '▦', 'icon-calendar'],
     music: ['Música', '♫', 'icon-music'],
     widgets: ['Centro de widgets', '✧', 'icon-widgets'],
@@ -46,7 +46,7 @@
 
   function appContent(id) {
     if (id === 'files') return `
-      <h2>Tu espacio</h2><p class="muted">Este explorador es una demostración local. Puedes abrir las herramientas de NEXORA desde aquí.</p>
+      <h2>Tu espacio</h2><p class="muted">Este explorador es una demostración local. Puedes abrir las herramientas de BOCS desde aquí.</p>
       <div class="file-grid">
         <button class="file-tile" data-open="notes"><span>📝</span><b>Mis notas</b></button>
         <button class="file-tile" data-open="settings"><span>🎨</span><b>Personalización</b></button>
@@ -68,9 +68,9 @@
         <button data-calc="value">0</button><button data-calc="value">.</button><button class="calc-eq" data-calc="equals">=</button><button class="calc-op" data-calc="value">+</button>
       </div></div>`;
     if (id === 'terminal') return `
-      <h2>Terminal NEXORA</h2><p class="muted">Consola de demostración: los comandos no ejecutan acciones en tu ordenador.</p>
-      <div class="terminal-box" id="terminalOutput"><div>NEXORA OS [versión 0.1 preview]</div><div>Escribe <b>help</b> para ver los comandos disponibles.</div></div>
-      <form class="terminal-line" id="terminalForm"><span>nexora &gt;</span><input id="terminalInput" autocomplete="off" placeholder="Escribe un comando..." aria-label="Comando"></form>`;
+      <h2>Terminal BOCS</h2><p class="muted">Consola de demostración: los comandos no ejecutan acciones en tu ordenador.</p>
+      <div class="terminal-box" id="terminalOutput"><div>BOCS OS [versión 0.1 preview]</div><div>Escribe <b>help</b> para ver los comandos disponibles.</div></div>
+      <form class="terminal-line" id="terminalForm"><span>bocs &gt;</span><input id="terminalInput" autocomplete="off" placeholder="Escribe un comando..." aria-label="Comando"></form>`;
     if (id === 'calendar') return `
       <h2>Calendario</h2><p class="muted">Consulta el calendario y navega entre meses.</p>
       <div class="calendar-toolbar"><strong id="calendarMonthLabel"></strong><div class="calendar-nav"><button data-action="calendar-prev" aria-label="Mes anterior">‹</button><button data-action="calendar-today" aria-label="Mes actual">Hoy</button><button data-action="calendar-next" aria-label="Mes siguiente">›</button></div></div>
@@ -93,7 +93,7 @@
       <form id="taskForm" class="task-form"><input id="taskInput" maxlength="120" placeholder="¿Qué tienes que hacer?" autocomplete="off" required><button type="submit">Añadir</button></form>
       <ul id="taskList" class="task-list"></ul>`;
     if (id === 'settings') return `
-      <h2>Personaliza tu espacio</h2><p class="muted">Ajusta el aspecto de NEXORA. Los cambios se guardan en este navegador.</p>
+      <h2>Personaliza tu espacio</h2><p class="muted">Ajusta el aspecto de BOCS. Los cambios se guardan en este navegador.</p>
       <div class="setting-row"><div><b>Color de acento</b><small>Elige el color principal de la interfaz.</small></div>
         <div class="swatches">
           <button class="swatch" style="background:#a78bfa" data-accent="#a78bfa" aria-label="Violeta" aria-pressed="false"></button>
@@ -105,11 +105,11 @@
       </div>
       <div class="setting-row"><div><b>Brillo del escritorio</b><small>Ajusta la intensidad del fondo.</small></div><input class="range-input" id="brightness" type="range" min="60" max="130" value="100" aria-label="Brillo"></div>
       <div class="setting-row"><div><b>Restablecer ajustes</b><small>Volver al aspecto inicial.</small></div><button class="setting-button" data-action="reset-settings">Restablecer</button></div>`;
-    return `<div style="display:flex;align-items:center;gap:15px;margin-bottom:20px"><span class="app-icon icon-about" style="width:58px;height:58px;font-size:25px">N</span><div><h2>NEXORA OS</h2><div style="color:var(--accent);font-size:11px">Versión 0.1 · Preview</div></div></div>
+    return `<div style="display:flex;align-items:center;gap:15px;margin-bottom:20px"><span class="app-icon icon-about" style="width:58px;height:58px;font-size:25px">N</span><div><h2>BOCS OS</h2><div style="color:var(--accent);font-size:11px">Versión 0.1 · Preview</div></div></div>
       <p class="muted">Un concepto de escritorio web creado con HTML, CSS y JavaScript. Este proyecto funciona en el navegador y guarda algunas preferencias localmente.</p>
       <div class="setting-row"><div><b>Estado</b><small>Interfaz cargada correctamente.</small></div><span style="color:#72e5b4">● Preparado</span></div>
       <div class="setting-row"><div><b>Aplicaciones incluidas</b><small>Archivos, Notas, Calculadora, Terminal y Ajustes.</small></div></div>
-      <p class="muted" style="font-size:10px;margin-top:18px">NEXORA OS es un proyecto independiente y no está afiliado a SerumOS.</p>`;
+      <p class="muted" style="font-size:10px;margin-top:18px">BOCS OS es un proyecto independiente y no está afiliado a SerumOS.</p>`;
   }
 
   function openApp(id) {
@@ -161,10 +161,10 @@
   }
 
   function getTasks() {
-    try { const tasks=JSON.parse(localStorage.getItem('nexora-tasks') || '[]'); return Array.isArray(tasks) ? tasks : []; }
+    try { const tasks=JSON.parse(localStorage.getItem('bocs-tasks') || '[]'); return Array.isArray(tasks) ? tasks : []; }
     catch { return []; }
   }
-  function saveTasks(tasks) { localStorage.setItem('nexora-tasks', JSON.stringify(tasks)); }
+  function saveTasks(tasks) { localStorage.setItem('bocs-tasks', JSON.stringify(tasks)); }
   function renderTasks(win) {
     const list=$('#taskList',win); if (!list) return;
     const tasks=getTasks(); list.innerHTML='';
@@ -211,7 +211,7 @@
   function runTerminal(command, win) {
     const output = $('#terminalOutput', win);
     const line = document.createElement('div');
-    line.textContent = `nexora > ${command}`;
+    line.textContent = `bocs > ${command}`;
     output.appendChild(line);
     const result = document.createElement('div');
     const parts = command.trim().split(/\s+/);
@@ -220,7 +220,7 @@
       help: 'Comandos: help, date, time, clear, about, apps, echo [texto]',
       date: new Date().toLocaleDateString('es-ES', {dateStyle:'full'}),
       time: new Date().toLocaleTimeString('es-ES'),
-      about: 'NEXORA OS 0.1 Preview — escritorio web.',
+      about: 'BOCS OS 0.1 Preview — escritorio web.',
       apps: 'Aplicaciones: files, notes, calculator, terminal, settings, calendar, music, widgets, tasks, about.',
       clear: ''
     };
@@ -251,14 +251,14 @@
     const action = e.target.closest('[data-action]');
     if (action) {
       const win = action.closest('.app-window');
-      if (action.dataset.action === 'save-note') { localStorage.setItem('nexora-notes', $('#noteArea', win).value); toast('Nota guardada en este navegador'); }
-      if (action.dataset.action === 'clear-note') { $('#noteArea', win).value=''; localStorage.setItem('nexora-notes',''); toast('Contenido borrado'); }
-      if (action.dataset.action === 'sample-file') toast('Bienvenido a NEXORA OS · versión 0.2');
+      if (action.dataset.action === 'save-note') { localStorage.setItem('bocs-notes', $('#noteArea', win).value); toast('Nota guardada en este navegador'); }
+      if (action.dataset.action === 'clear-note') { $('#noteArea', win).value=''; localStorage.setItem('bocs-notes',''); toast('Contenido borrado'); }
+      if (action.dataset.action === 'sample-file') toast('Bienvenido a BOCS OS · versión 0.2');
       if (action.dataset.action === 'calendar-prev') renderCalendar(win, Number(win.dataset.calendarOffset || 0)-1);
       if (action.dataset.action === 'calendar-next') renderCalendar(win, Number(win.dataset.calendarOffset || 0)+1);
       if (action.dataset.action === 'calendar-today') renderCalendar(win, 0);
       if (action.dataset.action === 'reset-settings') {
-        localStorage.removeItem('nexora-accent'); document.documentElement.style.setProperty('--accent','#a78bfa');
+        localStorage.removeItem('bocs-accent'); document.documentElement.style.setProperty('--accent','#a78bfa');
         $('#brightness',win).value=100; $('.desktop').style.filter='none'; syncSettings(win); toast('Ajustes restablecidos');
       }
       return;
@@ -276,7 +276,7 @@
     const accent = e.target.closest('[data-accent]');
     if (accent) {
       document.documentElement.style.setProperty('--accent', accent.dataset.accent);
-      localStorage.setItem('nexora-accent', accent.dataset.accent);
+      localStorage.setItem('bocs-accent', accent.dataset.accent);
       syncSettings(accent.closest('.app-window')); toast('Color actualizado'); return;
     }
     const calc = e.target.closest('[data-calc]');
@@ -312,7 +312,7 @@
     }
   });
   document.addEventListener('input', e => {
-    if (e.target.id === 'noteArea') localStorage.setItem('nexora-notes', e.target.value);
+    if (e.target.id === 'noteArea') localStorage.setItem('bocs-notes', e.target.value);
     if (e.target.id === 'brightness') $('.desktop').style.filter = `brightness(${e.target.value}%)`;
   });
   document.addEventListener('submit', e => {

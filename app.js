@@ -15,7 +15,11 @@
     calculator: ['Calculadora', '＋', 'icon-calc'],
     terminal: ['Terminal', '›_', 'icon-terminal'],
     settings: ['Ajustes', '⚙', 'icon-settings'],
-    about: ['Acerca de NEXORA', 'N', 'icon-about']
+    about: ['Acerca de NEXORA', 'N', 'icon-about'],
+    calendar: ['Calendario', '▦', 'icon-calendar'],
+    music: ['Música', '♫', 'icon-music'],
+    widgets: ['Centro de widgets', '✧', 'icon-widgets'],
+    tasks: ['Lista de tareas', '✓', 'icon-tasks']
   };
 
   function toast(message) {
@@ -35,6 +39,7 @@
     $('#dockDate').textContent = `${day} ${month}`;
     $('#dateDay').textContent = day;
     $('#dateMonth').textContent = now.toLocaleDateString('es-ES', {month:'long', year:'numeric'}).toUpperCase();
+    $$('[data-window="widgets"]', windowLayer).forEach(updateWidgetClock);
   }
   updateClock();
   setInterval(updateClock, 1000);
@@ -66,6 +71,27 @@
       <h2>Terminal NEXORA</h2><p class="muted">Consola de demostración: los comandos no ejecutan acciones en tu ordenador.</p>
       <div class="terminal-box" id="terminalOutput"><div>NEXORA OS [versión 0.1 preview]</div><div>Escribe <b>help</b> para ver los comandos disponibles.</div></div>
       <form class="terminal-line" id="terminalForm"><span>nexora &gt;</span><input id="terminalInput" autocomplete="off" placeholder="Escribe un comando..." aria-label="Comando"></form>`;
+    if (id === 'calendar') return `
+      <h2>Calendario</h2><p class="muted">Consulta el calendario y navega entre meses.</p>
+      <div class="calendar-toolbar"><strong id="calendarMonthLabel"></strong><div class="calendar-nav"><button data-action="calendar-prev" aria-label="Mes anterior">‹</button><button data-action="calendar-today" aria-label="Mes actual">Hoy</button><button data-action="calendar-next" aria-label="Mes siguiente">›</button></div></div>
+      <div id="calendarGrid" class="calendar-grid"></div>`;
+    if (id === 'music') return `
+      <h2>Reproductor de música</h2><p class="muted">Selecciona un archivo de audio de tu dispositivo. El archivo no se sube a Internet.</p>
+      <div class="music-drop"><div class="music-note">♫</div><b id="musicFileName">Tu música, a tu manera</b><p class="muted">MP3, WAV, OGG y otros formatos compatibles con tu navegador.</p>
+      <label class="music-file-label">Elegir archivo de audio<input id="musicFileInput" type="file" accept="audio/*"></label></div>
+      <audio id="musicAudio" class="audio-player" controls></audio>`;
+    if (id === 'widgets') {
+      const now = new Date();
+      return `<h2>Centro de widgets</h2><p class="muted">Un vistazo rápido a tu espacio de trabajo.</p>
+      <div class="system-widget-grid"><div class="system-widget"><span>HORA LOCAL</span><strong id="widgetTime">${now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}</strong></div>
+      <div class="system-widget"><span>FECHA</span><strong style="font-size:15px" id="widgetDate">${now.toLocaleDateString('es-ES',{day:'numeric',month:'short'})}</strong></div>
+      <div class="system-widget"><span>APLICACIONES</span><strong>10</strong></div><div class="system-widget"><span>ESTADO</span><strong style="color:#72e5b4;font-size:15px">Preparado</strong></div></div>
+      <div class="button-row"><button class="small-button" data-open="calendar">Abrir calendario ↗</button><button class="small-button" data-open="tasks">Ver tareas ↗</button><button class="small-button" data-open="settings">Ajustes ↗</button></div>`;
+    }
+    if (id === 'tasks') return `
+      <h2>Lista de tareas</h2><p class="muted">Añade pendientes y marca los que ya hayas terminado. La lista se guarda en este navegador.</p>
+      <form id="taskForm" class="task-form"><input id="taskInput" maxlength="120" placeholder="¿Qué tienes que hacer?" autocomplete="off" required><button type="submit">Añadir</button></form>
+      <ul id="taskList" class="task-list"></ul>`;
     if (id === 'settings') return `
       <h2>Personaliza tu espacio</h2><p class="muted">Ajusta el aspecto de NEXORA. Los cambios se guardan en este navegador.</p>
       <div class="setting-row"><div><b>Color de acento</b><small>Elige el color principal de la interfaz.</small></div>
@@ -106,8 +132,54 @@
     windowLayer.appendChild(win);
     if (id === 'notes') $('#noteArea', win).value = savedNotes();
     if (id === 'settings') syncSettings(win);
+    if (id === 'calendar') renderCalendar(win, 0);
+    if (id === 'tasks') renderTasks(win);
+    if (id === 'widgets') updateWidgetClock(win);
     makeDraggable(win);
     win.addEventListener('pointerdown', () => win.style.zIndex = ++zIndex);
+  }
+
+  function renderCalendar(win, offset) {
+    win.dataset.calendarOffset = String(offset);
+    const today = new Date();
+    const monthDate = new Date(today.getFullYear(), today.getMonth() + offset, 1);
+    $('#calendarMonthLabel', win).textContent = monthDate.toLocaleDateString('es-ES', {month:'long', year:'numeric'});
+    const grid = $('#calendarGrid', win);
+    grid.innerHTML = '';
+    ['L','M','X','J','V','S','D'].forEach(day => {
+      const label = document.createElement('div'); label.className='calendar-weekday'; label.textContent=day; grid.appendChild(label);
+    });
+    const firstDay = (monthDate.getDay() + 6) % 7;
+    const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth()+1, 0).getDate();
+    for (let i=0; i<firstDay; i++) { const blank=document.createElement('div'); blank.className='calendar-day empty'; grid.appendChild(blank); }
+    for (let day=1; day<=daysInMonth; day++) {
+      const cell=document.createElement('div'); cell.className='calendar-day'; cell.textContent=String(day);
+      if (offset===0 && day===today.getDate()) cell.classList.add('today');
+      cell.title = new Date(monthDate.getFullYear(), monthDate.getMonth(), day).toLocaleDateString('es-ES',{dateStyle:'full'});
+      grid.appendChild(cell);
+    }
+  }
+
+  function getTasks() {
+    try { const tasks=JSON.parse(localStorage.getItem('nexora-tasks') || '[]'); return Array.isArray(tasks) ? tasks : []; }
+    catch { return []; }
+  }
+  function saveTasks(tasks) { localStorage.setItem('nexora-tasks', JSON.stringify(tasks)); }
+  function renderTasks(win) {
+    const list=$('#taskList',win); if (!list) return;
+    const tasks=getTasks(); list.innerHTML='';
+    if (!tasks.length) { const empty=document.createElement('li'); empty.className='task-empty'; empty.textContent='Todavía no tienes tareas. ¡Añade la primera!'; list.appendChild(empty); return; }
+    tasks.forEach(task => {
+      const item=document.createElement('li'); item.className='task-item'+(task.done?' done':'');
+      const check=document.createElement('input'); check.type='checkbox'; check.checked=!!task.done; check.setAttribute('aria-label','Marcar tarea como completada'); check.dataset.taskToggle=task.id;
+      const label=document.createElement('span'); label.textContent=task.text;
+      const remove=document.createElement('button'); remove.className='task-delete'; remove.textContent='×'; remove.title='Eliminar tarea'; remove.dataset.taskDelete=task.id;
+      item.append(check,label,remove); list.appendChild(item);
+    });
+  }
+  function updateWidgetClock(win) {
+    const time=$('#widgetTime',win), date=$('#widgetDate',win); if (!time || !date) return;
+    const now=new Date(); time.textContent=now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}); date.textContent=now.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
   }
 
   function syncSettings(win) {
@@ -149,7 +221,7 @@
       date: new Date().toLocaleDateString('es-ES', {dateStyle:'full'}),
       time: new Date().toLocaleTimeString('es-ES'),
       about: 'NEXORA OS 0.1 Preview — escritorio web.',
-      apps: 'Aplicaciones: files, notes, calculator, settings, about.',
+      apps: 'Aplicaciones: files, notes, calculator, terminal, settings, calendar, music, widgets, tasks, about.',
       clear: ''
     };
     if (cmd === 'clear') output.innerHTML = '';
@@ -181,12 +253,25 @@
       const win = action.closest('.app-window');
       if (action.dataset.action === 'save-note') { localStorage.setItem('nexora-notes', $('#noteArea', win).value); toast('Nota guardada en este navegador'); }
       if (action.dataset.action === 'clear-note') { $('#noteArea', win).value=''; localStorage.setItem('nexora-notes',''); toast('Contenido borrado'); }
-      if (action.dataset.action === 'sample-file') toast('Bienvenido a NEXORA OS · versión 0.1');
+      if (action.dataset.action === 'sample-file') toast('Bienvenido a NEXORA OS · versión 0.2');
+      if (action.dataset.action === 'calendar-prev') renderCalendar(win, Number(win.dataset.calendarOffset || 0)-1);
+      if (action.dataset.action === 'calendar-next') renderCalendar(win, Number(win.dataset.calendarOffset || 0)+1);
+      if (action.dataset.action === 'calendar-today') renderCalendar(win, 0);
       if (action.dataset.action === 'reset-settings') {
         localStorage.removeItem('nexora-accent'); document.documentElement.style.setProperty('--accent','#a78bfa');
         $('#brightness',win).value=100; $('.desktop').style.filter='none'; syncSettings(win); toast('Ajustes restablecidos');
       }
       return;
+    }
+    const taskToggle = e.target.closest('[data-task-toggle]');
+    if (taskToggle) {
+      const tasks=getTasks(); const task=tasks.find(t=>t.id===taskToggle.dataset.taskToggle);
+      if (task) { task.done=taskToggle.checked; saveTasks(tasks); renderTasks(taskToggle.closest('.app-window')); }
+      return;
+    }
+    const taskDelete = e.target.closest('[data-task-delete]');
+    if (taskDelete) {
+      const tasks=getTasks().filter(t=>t.id!==taskDelete.dataset.taskDelete); saveTasks(tasks); renderTasks(taskDelete.closest('.app-window')); toast('Tarea eliminada'); return;
     }
     const accent = e.target.closest('[data-accent]');
     if (accent) {
@@ -217,11 +302,27 @@
 
   $('#homeButton').addEventListener('click', () => launcher.classList.toggle('hidden'));
   $('#dockClock').addEventListener('click', () => toast(new Date().toLocaleDateString('es-ES',{dateStyle:'full'})));
+  document.addEventListener('change', e => {
+    if (e.target.id === 'musicFileInput' && e.target.files && e.target.files[0]) {
+      const file=e.target.files[0]; const win=e.target.closest('.app-window');
+      const audio=$('#musicAudio',win); const oldUrl=audio.dataset.objectUrl;
+      if (oldUrl) URL.revokeObjectURL(oldUrl);
+      const url=URL.createObjectURL(file); audio.dataset.objectUrl=url; audio.src=url; audio.load();
+      $('#musicFileName',win).textContent=file.name; toast('Audio cargado');
+    }
+  });
   document.addEventListener('input', e => {
     if (e.target.id === 'noteArea') localStorage.setItem('nexora-notes', e.target.value);
     if (e.target.id === 'brightness') $('.desktop').style.filter = `brightness(${e.target.value}%)`;
   });
   document.addEventListener('submit', e => {
+    if (e.target.id === 'taskForm') {
+      e.preventDefault();
+      const win=e.target.closest('.app-window'); const input=$('#taskInput',win); const value=input.value.trim();
+      if (!value) return;
+      const tasks=getTasks(); tasks.push({id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random())), text:value, done:false});
+      saveTasks(tasks); renderTasks(win); input.value=''; input.focus(); toast('Tarea añadida');
+    }
     if (e.target.id === 'terminalForm') {
       e.preventDefault();
       const win = e.target.closest('.app-window');

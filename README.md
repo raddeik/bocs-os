@@ -24,3 +24,10 @@ Un escritorio web experimental hecho con HTML, CSS y JavaScript.
 - Ajustes de color y brillo.
 
 Nota: esto es un escritorio web, no un sistema operativo de arranque ni un reemplazo de Windows/ChromeOS.
+
+
+## Aplicaciones añadidas en la versión 0.2
+- Calendario mensual con navegación.
+- Reproductor de archivos de audio locales.
+- Centro de widgets con hora y fecha.
+- Lista de tareas guardada en el navegador.

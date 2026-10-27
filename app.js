@@ -4,18 +4,83 @@
   const windowLayer = $('#windowLayer');
   const launcher = $('#appLauncher');
   const toastEl = $('#toast');
+  const profileOverlay = $('#profileOverlay');
+  const profileList = $('#profileList');
+  const profileButton = $('#profileButton');
+  const PROFILE_KEY = 'bocs-profiles';
+  const ACTIVE_PROFILE_KEY = 'bocs-active-profile';
   let zIndex = 12;
   let toastTimer;
 
-  const savedNotes = () => localStorage.getItem('bocs-notes') || '';
-  const savedAccent = () => localStorage.getItem('bocs-accent') || '#a78bfa';
+  function readProfiles() {
+    try {
+      const value = JSON.parse(localStorage.getItem(PROFILE_KEY) || '[]');
+      return Array.isArray(value) ? value.filter(p => p && typeof p.id === 'string' && typeof p.name === 'string') : [];
+    } catch { return []; }
+  }
+  function writeProfiles(profiles) { localStorage.setItem(PROFILE_KEY, JSON.stringify(profiles)); }
+  function activeProfileId() { return localStorage.getItem(ACTIVE_PROFILE_KEY) || 'user-default'; }
+  function profileStorageKey(key, profileId = activeProfileId()) { return `${key}-${profileId}`; }
+  function migrateLegacyData(profileId) {
+    [['bocs-notes', ''], ['bocs-accent', '#a78bfa'], ['bocs-tasks', '[]']].forEach(([key]) => {
+      const scoped = profileStorageKey(key, profileId);
+      const legacy = localStorage.getItem(key);
+      if (legacy !== null && localStorage.getItem(scoped) === null) localStorage.setItem(scoped, legacy);
+      if (legacy !== null) localStorage.removeItem(key);
+    });
+  }
+  function ensureProfiles() {
+    let profiles = readProfiles();
+    if (!profiles.length) {
+      profiles = [{ id: 'user-default', name: 'Usuario', avatar: '👤', createdAt: Date.now() }];
+      writeProfiles(profiles);
+    }
+    if (!profiles.some(p => p.id === activeProfileId())) localStorage.setItem(ACTIVE_PROFILE_KEY, profiles[0].id);
+    migrateLegacyData(profiles[0].id);
+    return profiles;
+  }
+  function currentProfile() {
+    const profiles = readProfiles();
+    return profiles.find(p => p.id === activeProfileId()) || profiles[0] || { id: 'user-default', name: 'Usuario', avatar: '👤' };
+  }
+  function renderProfiles() {
+    const profiles = ensureProfiles();
+    profileList.innerHTML = '';
+    profiles.forEach(profile => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'profile-card';
+      card.dataset.profileEnter = profile.id;
+      const avatar = document.createElement('span'); avatar.className = 'profile-avatar'; avatar.textContent = profile.avatar || '👤';
+      const name = document.createElement('span'); name.className = 'profile-card-name'; name.textContent = profile.name;
+      const enter = document.createElement('span'); enter.className = 'profile-enter-label'; enter.textContent = 'Entrar ↗';
+      card.append(avatar, name, enter);
+      profileList.appendChild(card);
+    });
+  }
+  function showProfiles() {
+    renderProfiles();
+    profileOverlay.classList.remove('hidden');
+    $('#newProfileName').focus();
+  }
+  function enterProfile(id) {
+    const profiles = readProfiles();
+    if (!profiles.some(p => p.id === id)) return;
+    localStorage.setItem(ACTIVE_PROFILE_KEY, id);
+    migrateLegacyData(id);
+    sessionStorage.setItem('bocs-profile-entered', id);
+    window.location.reload();
+  }
+  ensureProfiles();
+  const savedNotes = () => localStorage.getItem(profileStorageKey('bocs-notes')) || '';
+  const savedAccent = () => localStorage.getItem(profileStorageKey('bocs-accent')) || '#a78bfa';
   const appNames = {
     files: ['Archivos', '▰', 'icon-folder'],
     notes: ['Notas', '✎', 'icon-notes'],
     calculator: ['Calculadora', '＋', 'icon-calc'],
     terminal: ['Terminal', '›_', 'icon-terminal'],
     settings: ['Ajustes', '⚙', 'icon-settings'],
-    about: ['Acerca de BOCS', 'N', 'icon-about'],
+    about: ['Acerca de BOCS', 'B', 'icon-about'],
     calendar: ['Calendario', '▦', 'icon-calendar'],
     music: ['Música', '♫', 'icon-music'],
     widgets: ['Centro de widgets', '✧', 'icon-widgets'],
@@ -105,7 +170,7 @@
       </div>
       <div class="setting-row"><div><b>Brillo del escritorio</b><small>Ajusta la intensidad del fondo.</small></div><input class="range-input" id="brightness" type="range" min="60" max="130" value="100" aria-label="Brillo"></div>
       <div class="setting-row"><div><b>Restablecer ajustes</b><small>Volver al aspecto inicial.</small></div><button class="setting-button" data-action="reset-settings">Restablecer</button></div>`;
-    return `<div style="display:flex;align-items:center;gap:15px;margin-bottom:20px"><span class="app-icon icon-about" style="width:58px;height:58px;font-size:25px">N</span><div><h2>BOCS OS</h2><div style="color:var(--accent);font-size:11px">Versión 0.1 · Preview</div></div></div>
+    return `<div style="display:flex;align-items:center;gap:15px;margin-bottom:20px"><span class="app-icon icon-about" style="width:58px;height:58px;font-size:25px">B</span><div><h2>BOCS OS</h2><div style="color:var(--accent);font-size:11px">Versión 0.1 · Preview</div></div></div>
       <p class="muted">Un concepto de escritorio web creado con HTML, CSS y JavaScript. Este proyecto funciona en el navegador y guarda algunas preferencias localmente.</p>
       <div class="setting-row"><div><b>Estado</b><small>Interfaz cargada correctamente.</small></div><span style="color:#72e5b4">● Preparado</span></div>
       <div class="setting-row"><div><b>Aplicaciones incluidas</b><small>Archivos, Notas, Calculadora, Terminal y Ajustes.</small></div></div>
@@ -161,10 +226,10 @@
   }
 
   function getTasks() {
-    try { const tasks=JSON.parse(localStorage.getItem('bocs-tasks') || '[]'); return Array.isArray(tasks) ? tasks : []; }
+    try { const tasks=JSON.parse(localStorage.getItem(profileStorageKey('bocs-tasks')) || '[]'); return Array.isArray(tasks) ? tasks : []; }
     catch { return []; }
   }
-  function saveTasks(tasks) { localStorage.setItem('bocs-tasks', JSON.stringify(tasks)); }
+  function saveTasks(tasks) { localStorage.setItem(profileStorageKey('bocs-tasks'), JSON.stringify(tasks)); }
   function renderTasks(win) {
     const list=$('#taskList',win); if (!list) return;
     const tasks=getTasks(); list.innerHTML='';
@@ -232,6 +297,9 @@
   }
 
   document.addEventListener('click', e => {
+    const profileEnter = e.target.closest('[data-profile-enter]');
+    if (profileEnter) { enterProfile(profileEnter.dataset.profileEnter); return; }
+    if (e.target.closest('#profileButton')) { showProfiles(); return; }
     const open = e.target.closest('[data-open]');
     if (open) { openApp(open.dataset.open); return; }
     const closeLauncher = e.target.closest('#closeLauncher');
@@ -251,14 +319,14 @@
     const action = e.target.closest('[data-action]');
     if (action) {
       const win = action.closest('.app-window');
-      if (action.dataset.action === 'save-note') { localStorage.setItem('bocs-notes', $('#noteArea', win).value); toast('Nota guardada en este navegador'); }
-      if (action.dataset.action === 'clear-note') { $('#noteArea', win).value=''; localStorage.setItem('bocs-notes',''); toast('Contenido borrado'); }
+      if (action.dataset.action === 'save-note') { localStorage.setItem(profileStorageKey('bocs-notes'), $('#noteArea', win).value); toast('Nota guardada en este navegador'); }
+      if (action.dataset.action === 'clear-note') { $('#noteArea', win).value=''; localStorage.setItem(profileStorageKey('bocs-notes'),''); toast('Contenido borrado'); }
       if (action.dataset.action === 'sample-file') toast('Bienvenido a BOCS OS · versión 0.2');
       if (action.dataset.action === 'calendar-prev') renderCalendar(win, Number(win.dataset.calendarOffset || 0)-1);
       if (action.dataset.action === 'calendar-next') renderCalendar(win, Number(win.dataset.calendarOffset || 0)+1);
       if (action.dataset.action === 'calendar-today') renderCalendar(win, 0);
       if (action.dataset.action === 'reset-settings') {
-        localStorage.removeItem('bocs-accent'); document.documentElement.style.setProperty('--accent','#a78bfa');
+        localStorage.removeItem(profileStorageKey('bocs-accent')); document.documentElement.style.setProperty('--accent','#a78bfa');
         $('#brightness',win).value=100; $('.desktop').style.filter='none'; syncSettings(win); toast('Ajustes restablecidos');
       }
       return;
@@ -276,7 +344,7 @@
     const accent = e.target.closest('[data-accent]');
     if (accent) {
       document.documentElement.style.setProperty('--accent', accent.dataset.accent);
-      localStorage.setItem('bocs-accent', accent.dataset.accent);
+      localStorage.setItem(profileStorageKey('bocs-accent'), accent.dataset.accent);
       syncSettings(accent.closest('.app-window')); toast('Color actualizado'); return;
     }
     const calc = e.target.closest('[data-calc]');
@@ -312,10 +380,30 @@
     }
   });
   document.addEventListener('input', e => {
-    if (e.target.id === 'noteArea') localStorage.setItem('bocs-notes', e.target.value);
+    if (e.target.id === 'noteArea') localStorage.setItem(profileStorageKey('bocs-notes'), e.target.value);
     if (e.target.id === 'brightness') $('.desktop').style.filter = `brightness(${e.target.value}%)`;
   });
   document.addEventListener('submit', e => {
+    if (e.target.id === 'profileForm') {
+      e.preventDefault();
+      const nameInput = $('#newProfileName');
+      const name = nameInput.value.trim();
+      if (!name) { nameInput.focus(); toast('Escribe un nombre para el perfil'); return; }
+      const profiles = readProfiles();
+      if (profiles.length >= 8) { toast('Puedes crear hasta 8 perfiles'); return; }
+      const profile = {
+        id: `user-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+        name,
+        avatar: $('#newProfileAvatar').value || '👤',
+        createdAt: Date.now()
+      };
+      profiles.push(profile);
+      writeProfiles(profiles);
+      localStorage.setItem(ACTIVE_PROFILE_KEY, profile.id);
+      nameInput.value = '';
+      enterProfile(profile.id);
+      return;
+    }
     if (e.target.id === 'taskForm') {
       e.preventDefault();
       const win=e.target.closest('.app-window'); const input=$('#taskInput',win); const value=input.value.trim();
@@ -332,6 +420,11 @@
   });
   const accent = savedAccent();
   document.documentElement.style.setProperty('--accent', accent);
+  const initialProfile = currentProfile();
+  $('#topProfileAvatar').textContent = initialProfile.avatar || '👤';
+  $('#topProfileName').textContent = initialProfile.name;
+  profileButton.setAttribute('aria-label', `Cambiar de usuario. Perfil actual: ${initialProfile.name}`);
+  if (sessionStorage.getItem('bocs-profile-entered') !== initialProfile.id) showProfiles();
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') launcher.classList.add('hidden');
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); launcher.classList.toggle('hidden'); }

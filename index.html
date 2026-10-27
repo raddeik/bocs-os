@@ -15,7 +15,7 @@
     <header class="topbar">
       <div class="brand"><span class="brand-mark">B</span><span>BOCS <b>OS</b></span></div>
       <div class="topbar-center" id="topbarStatus">Espacio de trabajo personal</div>
-      <div class="topbar-right"><span class="status-dot"></span><span>En línea</span><span id="topClock">21:00</span></div>
+      <div class="topbar-right"><span class="status-dot"></span><span>En línea</span><button class="profile-chip" id="profileButton" type="button" title="Cambiar de usuario"><span id="topProfileAvatar">👤</span><span id="topProfileName">Usuario</span><span aria-hidden="true">⌄</span></button><span id="topClock">21:00</span></div>
     </header>
 
     <section class="desktop-icons" aria-label="Aplicaciones del escritorio">
@@ -68,7 +68,7 @@
         <button data-open="calculator"><span class="app-icon icon-calc">＋</span><b>Calculadora</b><small>Cuentas rápidas</small></button>
         <button data-open="terminal"><span class="app-icon icon-terminal">›_</span><b>Terminal</b><small>Consola simulada</small></button>
         <button data-open="settings"><span class="app-icon icon-settings">⚙</span><b>Ajustes</b><small>Personaliza BOCS</small></button>
-        <button data-open="about"><span class="app-icon icon-about">N</span><b>Acerca de</b><small>Información del sistema</small></button>
+        <button data-open="about"><span class="app-icon icon-about">B</span><b>Acerca de</b><small>Información del sistema</small></button>
         <button data-open="calendar"><span class="app-icon icon-calendar">▦</span><b>Calendario</b><small>Organiza tus días</small></button>
         <button data-open="music"><span class="app-icon icon-music">♫</span><b>Música</b><small>Reproduce audio local</small></button>
         <button data-open="widgets"><span class="app-icon icon-widgets">✧</span><b>Widgets</b><small>Centro de información</small></button>
@@ -76,6 +76,26 @@
       </div>
     </div>
 
+    <section id="profileOverlay" class="profile-overlay" aria-modal="true" role="dialog" aria-labelledby="profileTitle">
+      <div class="profile-panel">
+        <div class="profile-brand"><span class="brand-mark">B</span><span>BOCS <b>OS</b></span></div>
+        <p class="profile-eyebrow">TU ESPACIO PERSONAL</p>
+        <h1 id="profileTitle">¿Quién va a usar BOCS OS?</h1>
+        <p class="profile-intro">Elige un perfil o crea uno nuevo para tener tus propias notas, tareas y preferencias.</p>
+        <div id="profileList" class="profile-list"></div>
+        <form id="profileForm" class="profile-form">
+          <label for="newProfileName">Crear un perfil nuevo</label>
+          <div class="profile-create-row">
+            <select id="newProfileAvatar" aria-label="Avatar del nuevo perfil">
+              <option value="👤">👤 Persona</option><option value="🦊">🦊 Zorro</option><option value="🐱">🐱 Gato</option><option value="🐼">🐼 Panda</option><option value="🚀">🚀 Cohete</option><option value="🎮">🎮 Gamer</option><option value="🌙">🌙 Luna</option><option value="⚡">⚡ Rayo</option>
+            </select>
+            <input id="newProfileName" type="text" maxlength="24" placeholder="Nombre del perfil" autocomplete="off" aria-label="Nombre del perfil" />
+            <button type="submit">Crear</button>
+          </div>
+        </form>
+        <div class="profile-footer"><span>PERFILES LOCALES</span><span>Se guardan en este navegador</span></div>
+      </div>
+    </section>
     <div id="toast" class="toast" role="status"></div>
   </main>
   <script src="app.js"></script>

@@ -1,4 +1,4 @@
-# NEXORA OS
+# BOCS OS
 
 Un escritorio web experimental hecho con HTML, CSS y JavaScript.
 
@@ -8,7 +8,7 @@ Un escritorio web experimental hecho con HTML, CSS y JavaScript.
 3. Abre `index.html` en un navegador.
 
 ## Publicarlo con GitHub y Vercel
-1. Crea un repositorio nuevo en GitHub, por ejemplo `nexora-os`.
+1. Crea un repositorio nuevo en GitHub, por ejemplo `bocs-os`.
 2. Sube `index.html`, `style.css` y `app.js` a la raíz del repositorio (no dentro de otra carpeta).
 3. En Vercel elige **Add New → Project** y conecta ese repositorio.
 4. Deja los ajustes predeterminados y pulsa **Deploy**.
@@ -31,3 +31,10 @@ Nota: esto es un escritorio web, no un sistema operativo de arranque ni un reemp
 - Reproductor de archivos de audio locales.
 - Centro de widgets con hora y fecha.
 - Lista de tareas guardada en el navegador.
+
+
+## Perfiles locales
+- Hasta 8 perfiles guardados en el navegador.
+- Cada perfil tiene nombre y avatar.
+- Notas, tareas y color de acento se guardan por perfil.
+- Los perfiles son locales: no usan contraseñas ni sincronización en la nube.

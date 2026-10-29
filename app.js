@@ -201,7 +201,7 @@
     if (id === 'tasks') renderTasks(win);
     if (id === 'widgets') updateWidgetClock(win);
     makeDraggable(win);
-    win.addEventListener('pointerdown', () => win.style.zIndex = ++zIndex);
+    win.('pointerdown', () => win.style.zIndex = ++zIndex);
   }
 
   function renderCalendar(win, offset) {
@@ -255,7 +255,7 @@
   function makeDraggable(win) {
     const bar = $('.window-titlebar', win);
     let startX=0, startY=0, origX=0, origY=0, dragging=false;
-    bar.addEventListener('pointerdown', e => {
+    bar.('pointerdown', e => {
       if (e.target.closest('.window-controls') || win.classList.contains('maximized')) return;
       dragging = true;
       const rect = win.getBoundingClientRect();
@@ -263,14 +263,14 @@
       win.style.left=`${rect.left}px`; win.style.top=`${rect.top}px`; win.style.transform='none';
       bar.setPointerCapture(e.pointerId);
     });
-    bar.addEventListener('pointermove', e => {
+    bar.('pointermove', e => {
       if (!dragging) return;
       const x=Math.max(0,Math.min(window.innerWidth-win.offsetWidth,origX+e.clientX-startX));
       const y=Math.max(58,Math.min(window.innerHeight-110,origY+e.clientY-startY));
       win.style.left=`${x}px`; win.style.top=`${y}px`;
     });
-    bar.addEventListener('pointerup', () => dragging=false);
-    bar.addEventListener('pointercancel', () => dragging=false);
+    bar.('pointerup', () => dragging=false);
+    bar.('pointercancel', () => dragging=false);
   }
 
   function runTerminal(command, win) {
@@ -296,7 +296,7 @@
     output.scrollTop = output.scrollHeight;
   }
 
-  document.addEventListener('click', e => {
+  document.('click', e => {
     const profileEnter = e.target.closest('[data-profile-enter]');
     if (profileEnter) { enterProfile(profileEnter.dataset.profileEnter); return; }
     if (e.target.closest('#profileButton')) { showProfiles(); return; }
@@ -368,9 +368,9 @@
     }
   });
 
-  $('#homeButton').addEventListener('click', () => launcher.classList.toggle('hidden'));
-  $('#dockClock').addEventListener('click', () => toast(new Date().toLocaleDateString('es-ES',{dateStyle:'full'})));
-  document.addEventListener('change', e => {
+  $('#homeButton').('click', () => launcher.classList.toggle('hidden'));
+  $('#dockClock').('click', () => toast(new Date().toLocaleDateString('es-ES',{dateStyle:'full'})));
+  document.('change', e => {
     if (e.target.id === 'musicFileInput' && e.target.files && e.target.files[0]) {
       const file=e.target.files[0]; const win=e.target.closest('.app-window');
       const audio=$('#musicAudio',win); const oldUrl=audio.dataset.objectUrl;
@@ -379,11 +379,11 @@
       $('#musicFileName',win).textContent=file.name; toast('Audio cargado');
     }
   });
-  document.addEventListener('input', e => {
+  document.('input', e => {
     if (e.target.id === 'noteArea') localStorage.setItem(profileStorageKey('boqs-notes'), e.target.value);
     if (e.target.id === 'brightness') $('.desktop').style.filter = `brightness(${e.target.value}%)`;
   });
-  document.addEventListener('submit', e => {
+  document.('submit', e => {
     if (e.target.id === 'profileForm') {
       e.preventDefault();
       const nameInput = $('#newProfileName');
@@ -425,7 +425,7 @@
   $('#topProfileName').textContent = initialProfile.name;
   profileButton.setAttribute('aria-label', `Cambiar de usuario. Perfil actual: ${initialProfile.name}`);
   if (sessionStorage.getItem('boqs-profile-entered') !== initialProfile.id) showProfiles();
-  document.addEventListener('keydown', e => {
+  document.('keydown', e => {
     if (e.key === 'Escape') launcher.classList.add('hidden');
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); launcher.classList.toggle('hidden'); }
   });

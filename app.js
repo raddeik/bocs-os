@@ -7,8 +7,8 @@
   const profileOverlay = $('#profileOverlay');
   const profileList = $('#profileList');
   const profileButton = $('#profileButton');
-  const PROFILE_KEY = 'bocs-profiles';
-  const ACTIVE_PROFILE_KEY = 'bocs-active-profile';
+  const PROFILE_KEY = 'boqs-profiles';
+  const ACTIVE_PROFILE_KEY = 'boqs-active-profile';
   let zIndex = 12;
   let toastTimer;
 
@@ -22,7 +22,7 @@
   function activeProfileId() { return localStorage.getItem(ACTIVE_PROFILE_KEY) || 'user-default'; }
   function profileStorageKey(key, profileId = activeProfileId()) { return `${key}-${profileId}`; }
   function migrateLegacyData(profileId) {
-    [['bocs-notes', ''], ['bocs-accent', '#a78bfa'], ['bocs-tasks', '[]']].forEach(([key]) => {
+    [['boqs-notes', ''], ['boqs-accent', '#a78bfa'], ['boqs-tasks', '[]']].forEach(([key]) => {
       const scoped = profileStorageKey(key, profileId);
       const legacy = localStorage.getItem(key);
       if (legacy !== null && localStorage.getItem(scoped) === null) localStorage.setItem(scoped, legacy);
@@ -68,19 +68,19 @@
     if (!profiles.some(p => p.id === id)) return;
     localStorage.setItem(ACTIVE_PROFILE_KEY, id);
     migrateLegacyData(id);
-    sessionStorage.setItem('bocs-profile-entered', id);
+    sessionStorage.setItem('boqs-profile-entered', id);
     window.location.reload();
   }
   ensureProfiles();
-  const savedNotes = () => localStorage.getItem(profileStorageKey('bocs-notes')) || '';
-  const savedAccent = () => localStorage.getItem(profileStorageKey('bocs-accent')) || '#a78bfa';
+  const savedNotes = () => localStorage.getItem(profileStorageKey('boqs-notes')) || '';
+  const savedAccent = () => localStorage.getItem(profileStorageKey('boqs-accent')) || '#a78bfa';
   const appNames = {
     files: ['Archivos', '▰', 'icon-folder'],
     notes: ['Notas', '✎', 'icon-notes'],
     calculator: ['Calculadora', '＋', 'icon-calc'],
     terminal: ['Terminal', '›_', 'icon-terminal'],
     settings: ['Ajustes', '⚙', 'icon-settings'],
-    about: ['Acerca de BOCS', 'B', 'icon-about'],
+    about: ['Acerca de BOQS', 'B', 'icon-about'],
     calendar: ['Calendario', '▦', 'icon-calendar'],
     music: ['Música', '♫', 'icon-music'],
     widgets: ['Centro de widgets', '✧', 'icon-widgets'],
@@ -111,7 +111,7 @@
 
   function appContent(id) {
     if (id === 'files') return `
-      <h2>Tu espacio</h2><p class="muted">Este explorador es una demostración local. Puedes abrir las herramientas de BOCS desde aquí.</p>
+      <h2>Tu espacio</h2><p class="muted">Este explorador es una demostración local. Puedes abrir las herramientas de BOQS desde aquí.</p>
       <div class="file-grid">
         <button class="file-tile" data-open="notes"><span>📝</span><b>Mis notas</b></button>
         <button class="file-tile" data-open="settings"><span>🎨</span><b>Personalización</b></button>
@@ -133,9 +133,9 @@
         <button data-calc="value">0</button><button data-calc="value">.</button><button class="calc-eq" data-calc="equals">=</button><button class="calc-op" data-calc="value">+</button>
       </div></div>`;
     if (id === 'terminal') return `
-      <h2>Terminal BOCS</h2><p class="muted">Consola de demostración: los comandos no ejecutan acciones en tu ordenador.</p>
-      <div class="terminal-box" id="terminalOutput"><div>BOCS OS [versión 0.1 preview]</div><div>Escribe <b>help</b> para ver los comandos disponibles.</div></div>
-      <form class="terminal-line" id="terminalForm"><span>bocs &gt;</span><input id="terminalInput" autocomplete="off" placeholder="Escribe un comando..." aria-label="Comando"></form>`;
+      <h2>Terminal BOQS</h2><p class="muted">Consola de demostración: los comandos no ejecutan acciones en tu ordenador.</p>
+      <div class="terminal-box" id="terminalOutput"><div>BOQS OS [versión 0.1 preview]</div><div>Escribe <b>help</b> para ver los comandos disponibles.</div></div>
+      <form class="terminal-line" id="terminalForm"><span>boqs &gt;</span><input id="terminalInput" autocomplete="off" placeholder="Escribe un comando..." aria-label="Comando"></form>`;
     if (id === 'calendar') return `
       <h2>Calendario</h2><p class="muted">Consulta el calendario y navega entre meses.</p>
       <div class="calendar-toolbar"><strong id="calendarMonthLabel"></strong><div class="calendar-nav"><button data-action="calendar-prev" aria-label="Mes anterior">‹</button><button data-action="calendar-today" aria-label="Mes actual">Hoy</button><button data-action="calendar-next" aria-label="Mes siguiente">›</button></div></div>
@@ -158,7 +158,7 @@
       <form id="taskForm" class="task-form"><input id="taskInput" maxlength="120" placeholder="¿Qué tienes que hacer?" autocomplete="off" required><button type="submit">Añadir</button></form>
       <ul id="taskList" class="task-list"></ul>`;
     if (id === 'settings') return `
-      <h2>Personaliza tu espacio</h2><p class="muted">Ajusta el aspecto de BOCS. Los cambios se guardan en este navegador.</p>
+      <h2>Personaliza tu espacio</h2><p class="muted">Ajusta el aspecto de BOQS. Los cambios se guardan en este navegador.</p>
       <div class="setting-row"><div><b>Color de acento</b><small>Elige el color principal de la interfaz.</small></div>
         <div class="swatches">
           <button class="swatch" style="background:#a78bfa" data-accent="#a78bfa" aria-label="Violeta" aria-pressed="false"></button>
@@ -170,11 +170,11 @@
       </div>
       <div class="setting-row"><div><b>Brillo del escritorio</b><small>Ajusta la intensidad del fondo.</small></div><input class="range-input" id="brightness" type="range" min="60" max="130" value="100" aria-label="Brillo"></div>
       <div class="setting-row"><div><b>Restablecer ajustes</b><small>Volver al aspecto inicial.</small></div><button class="setting-button" data-action="reset-settings">Restablecer</button></div>`;
-    return `<div style="display:flex;align-items:center;gap:15px;margin-bottom:20px"><span class="app-icon icon-about" style="width:58px;height:58px;font-size:25px">B</span><div><h2>BOCS OS</h2><div style="color:var(--accent);font-size:11px">Versión 0.1 · Preview</div></div></div>
+    return `<div style="display:flex;align-items:center;gap:15px;margin-bottom:20px"><span class="app-icon icon-about" style="width:58px;height:58px;font-size:25px">B</span><div><h2>BOQS OS</h2><div style="color:var(--accent);font-size:11px">Versión 0.1 · Preview</div></div></div>
       <p class="muted">Un concepto de escritorio web creado con HTML, CSS y JavaScript. Este proyecto funciona en el navegador y guarda algunas preferencias localmente.</p>
       <div class="setting-row"><div><b>Estado</b><small>Interfaz cargada correctamente.</small></div><span style="color:#72e5b4">● Preparado</span></div>
       <div class="setting-row"><div><b>Aplicaciones incluidas</b><small>Archivos, Notas, Calculadora, Terminal y Ajustes.</small></div></div>
-      <p class="muted" style="font-size:10px;margin-top:18px">BOCS OS es un proyecto independiente y no está afiliado a SerumOS.</p>`;
+      <p class="muted" style="font-size:10px;margin-top:18px">BOQS OS es un proyecto independiente y no está afiliado a SerumOS.</p>`;
   }
 
   function openApp(id) {
@@ -226,10 +226,10 @@
   }
 
   function getTasks() {
-    try { const tasks=JSON.parse(localStorage.getItem(profileStorageKey('bocs-tasks')) || '[]'); return Array.isArray(tasks) ? tasks : []; }
+    try { const tasks=JSON.parse(localStorage.getItem(profileStorageKey('boqs-tasks')) || '[]'); return Array.isArray(tasks) ? tasks : []; }
     catch { return []; }
   }
-  function saveTasks(tasks) { localStorage.setItem(profileStorageKey('bocs-tasks'), JSON.stringify(tasks)); }
+  function saveTasks(tasks) { localStorage.setItem(profileStorageKey('boqs-tasks'), JSON.stringify(tasks)); }
   function renderTasks(win) {
     const list=$('#taskList',win); if (!list) return;
     const tasks=getTasks(); list.innerHTML='';
@@ -276,7 +276,7 @@
   function runTerminal(command, win) {
     const output = $('#terminalOutput', win);
     const line = document.createElement('div');
-    line.textContent = `bocs > ${command}`;
+    line.textContent = `boqs > ${command}`;
     output.appendChild(line);
     const result = document.createElement('div');
     const parts = command.trim().split(/\s+/);
@@ -285,7 +285,7 @@
       help: 'Comandos: help, date, time, clear, about, apps, echo [texto]',
       date: new Date().toLocaleDateString('es-ES', {dateStyle:'full'}),
       time: new Date().toLocaleTimeString('es-ES'),
-      about: 'BOCS OS 0.1 Preview — escritorio web.',
+      about: 'BOQS OS 0.1 Preview — escritorio web.',
       apps: 'Aplicaciones: files, notes, calculator, terminal, settings, calendar, music, widgets, tasks, about.',
       clear: ''
     };
@@ -319,14 +319,14 @@
     const action = e.target.closest('[data-action]');
     if (action) {
       const win = action.closest('.app-window');
-      if (action.dataset.action === 'save-note') { localStorage.setItem(profileStorageKey('bocs-notes'), $('#noteArea', win).value); toast('Nota guardada en este navegador'); }
-      if (action.dataset.action === 'clear-note') { $('#noteArea', win).value=''; localStorage.setItem(profileStorageKey('bocs-notes'),''); toast('Contenido borrado'); }
-      if (action.dataset.action === 'sample-file') toast('Bienvenido a BOCS OS · versión 0.2');
+      if (action.dataset.action === 'save-note') { localStorage.setItem(profileStorageKey('boqs-notes'), $('#noteArea', win).value); toast('Nota guardada en este navegador'); }
+      if (action.dataset.action === 'clear-note') { $('#noteArea', win).value=''; localStorage.setItem(profileStorageKey('boqs-notes'),''); toast('Contenido borrado'); }
+      if (action.dataset.action === 'sample-file') toast('Bienvenido a BOQS OS · versión 0.2');
       if (action.dataset.action === 'calendar-prev') renderCalendar(win, Number(win.dataset.calendarOffset || 0)-1);
       if (action.dataset.action === 'calendar-next') renderCalendar(win, Number(win.dataset.calendarOffset || 0)+1);
       if (action.dataset.action === 'calendar-today') renderCalendar(win, 0);
       if (action.dataset.action === 'reset-settings') {
-        localStorage.removeItem(profileStorageKey('bocs-accent')); document.documentElement.style.setProperty('--accent','#a78bfa');
+        localStorage.removeItem(profileStorageKey('boqs-accent')); document.documentElement.style.setProperty('--accent','#a78bfa');
         $('#brightness',win).value=100; $('.desktop').style.filter='none'; syncSettings(win); toast('Ajustes restablecidos');
       }
       return;
@@ -344,7 +344,7 @@
     const accent = e.target.closest('[data-accent]');
     if (accent) {
       document.documentElement.style.setProperty('--accent', accent.dataset.accent);
-      localStorage.setItem(profileStorageKey('bocs-accent'), accent.dataset.accent);
+      localStorage.setItem(profileStorageKey('boqs-accent'), accent.dataset.accent);
       syncSettings(accent.closest('.app-window')); toast('Color actualizado'); return;
     }
     const calc = e.target.closest('[data-calc]');
@@ -380,7 +380,7 @@
     }
   });
   document.addEventListener('input', e => {
-    if (e.target.id === 'noteArea') localStorage.setItem(profileStorageKey('bocs-notes'), e.target.value);
+    if (e.target.id === 'noteArea') localStorage.setItem(profileStorageKey('boqs-notes'), e.target.value);
     if (e.target.id === 'brightness') $('.desktop').style.filter = `brightness(${e.target.value}%)`;
   });
   document.addEventListener('submit', e => {
@@ -424,7 +424,7 @@
   $('#topProfileAvatar').textContent = initialProfile.avatar || '👤';
   $('#topProfileName').textContent = initialProfile.name;
   profileButton.setAttribute('aria-label', `Cambiar de usuario. Perfil actual: ${initialProfile.name}`);
-  if (sessionStorage.getItem('bocs-profile-entered') !== initialProfile.id) showProfiles();
+  if (sessionStorage.getItem('boqs-profile-entered') !== initialProfile.id) showProfiles();
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') launcher.classList.add('hidden');
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); launcher.classList.toggle('hidden'); }
